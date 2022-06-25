@@ -1,0 +1,93 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+header {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+}
+
+.game {
+    flex: 1 1 auto;
+}
+
+h1 {
+    font-size: 1rem;
+    flex: 1 0 auto;
+}
+
+.room-out-header {
+    flex: 0 0 auto;
+}
+
+.gameover {
+    width: 25vw;
+    height: 25vw;
+    border: 1px solid black;
+    background-color: wheat;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.hide {
+    display: none;
+}
+
+.gameover > * {
+    padding-left: 10px;
+}
+
+.splitview {
+    display: flex;
+    flex-direction: row;
+}
+
+.splitview > * {
+    flex: 1 1 50%;
+}
+
+.mainmenu {
+    width: 25vw;
+    height: 25vw;
+    border: 1px solid black;
+    background-color: wheat;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1rem;
+}
+
+.mainmenu h2 {
+    font-family: 'Rubik Bubbles', cursive;
+    width: 100%;
+    text-align: center;
+    color: #333;
+    font-size: 3rem;
+    font-weight: normal;
+    margin: 1rem 0;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 5rem;
+    margin: 1rem 0;
+}
+
+.form-row > label {
+    color: #666;
+    font-size: .8rem;
+}

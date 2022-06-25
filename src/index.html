@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Scrbble fun!</title>
+    <link rel="stylesheet" href="style.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Bubbles&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Scrbble fun!</h1>
+        <p class="room-out-header hide">Current room: <span class="roomid-out"></span></p>
+      </header>
+      <div class="game">
+        <canvas id="pixiview"></canvas>
+      </div>
+      <div class="gameover hide">
+        <h2>Game Over</h2>
+      </div>
+      <div class="mainmenu">
+        <h2>Scrbble</h2>
+        <div class="splitview">
+          <div>
+            <div class="form-row">
+              <label for="room_id">Join a room</label>
+              <input type="text" id="room_id" name="room_id" placeholder="Room ID" />
+            </div>
+            <div class="form-row">
+              <button type="button" data-target="join">
+                Join
+              </button>
+            </div>
+          </div>
+          <div>
+            <button type="button" data-target="new">Create room</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="app/main.ts"></script>
+  </body>
+</html>

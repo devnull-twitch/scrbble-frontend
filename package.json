@@ -1,0 +1,22 @@
+{
+  "name": "scrbble",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "parcel build src/index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel": "^2.6.0",
+    "querystring-es3": "^0.2.1",
+    "sharp": "^0.29.3",
+    "spritesheet-js": "^1.2.6"
+  },
+  "dependencies": {
+    "pixi-viewport": "^4.34.4",
+    "pixi.js": "^6.4.2"
+  }
+}
