@@ -20,7 +20,7 @@ export const start = (
     onDisconnect: (name: string) => void,
     gameOver: () => void,
 ): WebSocket => {
-    const socket = new WebSocket(`ws://localhost:8090/ws?rk=${roomID}`);
+    const socket = new WebSocket(`ws://${process.env.BASE_URL}/ws?rk=${roomID}`);
     
     socket.addEventListener("open", () => {
         console.log("connection is open");

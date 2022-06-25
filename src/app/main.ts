@@ -165,7 +165,7 @@ const setupMenu = () => {
             switch (buttonElem.dataset["target"]) {
                 case "new":
                     const getRoomAndBoot = async () => {
-                        const resp = await fetch("http://localhost:8090/make_room", {
+                        const resp = await fetch(`http://${process.env.BASE_URL}/make_room`, {
                             method: "POST",
                         });
                         const json: NewRoomResponse = await resp.json();
