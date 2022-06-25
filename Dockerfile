@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY . .
 
-RUN npm install && \
+RUN apk add --no-cache ca-certificates git && \
+    npm install && \
     npm run build
 
 FROM nginx:mainline-alpine
