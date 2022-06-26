@@ -20,7 +20,8 @@ export const start = (
     onDisconnect: (name: string) => void,
     gameOver: () => void,
 ): WebSocket => {
-    const socket = new WebSocket(`ws://${process.env.BASE_URL}/ws?rk=${roomID}`);
+    const proto = process.env.SECURE_BACKEND === "1" ? "wss" : "ws";
+    const socket = new WebSocket(`${proto}://${process.env.BASE_URL}/ws?rk=${roomID}`);
     
     socket.addEventListener("open", () => {
         console.log("connection is open");
