@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY . .
 
+ENV BASE_URL api.scrbble.fun
+
 RUN apk add --no-cache ca-certificates git && \
     npm install && \
     npm run build
