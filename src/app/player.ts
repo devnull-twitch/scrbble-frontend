@@ -20,6 +20,7 @@ export class Player {
     currentT: number = 0;
     parts: SnakePart[];
     pixiContainer: PIXI.Container;
+    color: string;
     private headContainer: PIXI.Container;
     private step: number = 0;
 
@@ -31,6 +32,11 @@ export class Player {
         this.pixiContainer = pixiContainer;
         this.pixiContainer.sortableChildren = true;
 
+        if (isMainPlayer) {
+            const colorInput = document.querySelector("#bubble_color") as HTMLInputElement;
+            this.color = colorInput.value;
+        }
+
         const bubbleURL = new URL(
             '/assets/Bubble.png?width=128',
             import.meta.url
@@ -38,6 +44,23 @@ export class Player {
         const bubbleSprite = PIXI.Sprite.from(bubbleURL.toString());
         bubbleSprite.rotation = Math.PI / 2;
         bubbleSprite.position.set(64, -64);
+        
+        const modulateFilter = new PIXI.filters.ColorMatrixFilter();
+        
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(colorInput.value);
+        const colors = result ? {
+            r: parseInt(result[1], 16) / 255,
+            g: parseInt(result[2], 16) / 255,
+            b: parseInt(result[3], 16) / 255
+        } : { r: 1, g: 1, b: 1 };
+        modulateFilter.matrix = [
+            colors.r, 0, 0, 0, 0,
+            0, colors.g, 0, 0, 0,
+            0, 0, colors.b, 0, 0,
+            0, 0, 0, 1, 0
+        ];
+        bubbleSprite.filters = [modulateFilter];
+        
         this.headContainer.addChild(bubbleSprite);
 
         const faceURL = new URL(

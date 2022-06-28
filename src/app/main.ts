@@ -1,158 +1,85 @@
-import * as PIXI from "pixi.js";
-import { start } from "./client";
-import { createPart, Player } from "./player";
-import { Viewport } from 'pixi-viewport';
+import { createClient, Events, PlayerEventPayload, PlayerPositionEventPayload } from "./networking";
+import { Renderer } from "./rendering/renderer";
+import { loadGraphics } from "./graphics";
+import { getRotation, tick as inputTick } from "./input";
 
-interface Game {
-    pixiApp: PIXI.Application
-}
 
-const BackgroundXSpacing = 60;
-
-const boot = (roomID: string) => {
+const boot = async (roomID: string) => {
     const roomOut = document.querySelector(".roomid-out") as HTMLElement;
     roomOut.textContent = roomID;
-    document.querySelector(".room-out-header")?.classList.remove("hide");
+    document.querySelector(".room-out-header")?.classList.remove("invis");
+
+    const colorInput = document.querySelector("#bubble_color") as HTMLInputElement;
+    const color = colorInput.value;
 
     const renderCanvas = document.getElementById("pixiview") as HTMLCanvasElement;
     const gameContainer = document.querySelector(".game") as HTMLElement;
 
-    const playerContainer = new PIXI.Container();
-    const mainPlayer = new Player("mainplayer", playerContainer, true);
+    const netClient = createClient(roomID, color)
 
-    const g: Game = {
-        pixiApp: new PIXI.Application({
-            view: renderCanvas,
-            resizeTo: gameContainer,
-            backgroundColor: 0xFFFFFF,
-        }),
-    };
-
-    const viewport = new Viewport({
-        screenHeight: gameContainer.clientHeight,
-        screenWidth: gameContainer.clientWidth,
-        worldHeight: 5000,
-        worldWidth: 5000,
+    const graphics = await loadGraphics();
+    const gameRender = new Renderer(renderCanvas, gameContainer, graphics, (dt) => {
+        inputTick(dt);
+        const t = getRotation();
+        netClient.send({t});
     });
 
-    const playerNameMap = new Map<string, Player>();
-    const setPlayerPosition = (player_id: string, x: number, y: number) => {
-        if (!playerNameMap.has(player_id)) {
-            const newPlayerContainer = new PIXI.Container();
-            const newPlayer = new Player(player_id, newPlayerContainer, false);
-            playerNameMap.set(player_id, newPlayer);
-            viewport.addChild(newPlayerContainer);
-        }
-
-        const op = playerNameMap.get(player_id) as Player;
-        op.updatePosition(x, y);
-
-        if (player_id === mainPlayer.identifier) {
-            viewport.moveCenter(x, y);
-        }
-    };
-
-    const setMainPlayerName = (player_id: string) => {
-        mainPlayer.identifier = player_id;
-        playerNameMap.set(player_id, mainPlayer);
-    };
-
-    const onDisconnect = (playerID: string) => {
-        if (!playerNameMap.has(playerID)) {
-            return;
-        }
-
-        const playerObj = playerNameMap.get(playerID) as Player;
-        viewport.removeChild(playerObj.pixiContainer);
-        playerNameMap.delete(playerID);
-    }
-
-    const bubbleURL = new URL(
-        '/assets/Bubble.png?width=128',
-        import.meta.url
-    );
-    const addSnakePart = (player_id: string) => {
-        if (!playerNameMap.has(player_id)) {
-            return;
-        }
-
-        let pickupPlayer = playerNameMap.get(player_id) as Player;
-
-        const newPart = createPart(bubbleURL);
-        pickupPlayer.parts = [...pickupPlayer.parts, newPart];
-
-        newPart.container.zIndex = -pickupPlayer.parts.length;
-        pickupPlayer.pixiContainer.addChild(newPart.container);
-
-        if (pickupPlayer.parts.length > 2 && player_id === mainPlayer.identifier) {
-            let scaleValue = (22 - pickupPlayer.parts.length) / 20;
-            if (scaleValue < 0.5) {
-                scaleValue = 0.5;
-            } 
-            viewport.scale.set(scaleValue, scaleValue);
-        }
-    };
-
-    const gameOver = () => {
-        g.pixiApp.stop();
-        document.querySelector(".gameover")?.classList.remove("hide")
-    };
-
-    const pebbleContainer = new PIXI.Container();
-
-    const socket = start(
-        roomID,
-        pebbleContainer,
-        setMainPlayerName,
-        setPlayerPosition,
-        addSnakePart,
-        onDisconnect,
-        gameOver,
-    );
-
-    g.pixiApp.ticker.add(() => {
-        mainPlayer.tickRotation();
-        if (socket.readyState == socket.OPEN) {
-            socket.send(JSON.stringify({t: mainPlayer.currentT}));
-        }
+    let mainPlayerName: string = "";
+    netClient.on(Events.YouAre, (payload) => {
+        mainPlayerName = payload.name;
+        gameRender.addPlayer(payload.name, color.replace("#", ""));
     });
 
-    const background = new PIXI.Container();
-    background.position.set(0, 0);
-    viewport.addChild(background);
-    setupBackground(background, BackgroundXSpacing, viewport.worldWidth, viewport.worldHeight);
+    netClient.on(Events.PlayerAdd, (payload) => {
+        gameRender.addPlayer(payload.name, payload.color);
+    });
 
-    viewport.addChild(pebbleContainer);
-    viewport.addChild(playerContainer);
+    netClient.on(Events.PositionUpdate, (payload) => {
+        let center = false;
+        if (mainPlayerName === payload.name) {
+            center = true;
+        }
+        gameRender.setPlayerPosition(payload.name, payload.x, payload.y, payload.t, center);
+    });
 
-    g.pixiApp.stage.addChild(viewport);
+    netClient.on(Events.PlayerRemove, (payload) => {
+        gameRender.removePlayer(payload.name);
+    });
+
+    const onClose = () => {
+        gameRender.stop();
+        document.querySelector(".mainmenu")?.classList.remove("hide");
+        document.querySelector(".room-out-header")?.classList.add("invis");
+    };
+    netClient.on(Events.ConnectionClose, onClose);
+    netClient.on(Events.ConnectionError, onClose);
+    document.querySelector(".leave-room-btn")?.addEventListener("click", onClose);
+
+    netClient.on(Events.PlayerPartAdd, (payload) => {
+        let resize = false;
+        if (mainPlayerName === payload.name) {
+            resize = true;
+        }
+        gameRender.addPlayerPart(payload.name, resize);
+    });
+
+    netClient.on(Events.GameOver, () => {
+        gameRender.stop();
+        document.querySelector(".room-out-header")?.classList.add("invis");
+        document.querySelector(".gameover")?.classList.remove("hide");
+    });
+
+    netClient.on(Events.PebbleAdd, (payload) => {
+        gameRender.addPebble(payload.id, payload.x, payload.y);
+    });
+
+    netClient.on(Events.PebbleRemove, (payload) => {
+        gameRender.removePebble(payload.id);
+    });
+
+    netClient.connect();
     
     console.log("boot complete");
-};
-
-const setupBackground = (bgContainer: PIXI.Container, ySpacing: number, width: number, height: number) => {
-    const bg = new PIXI.Graphics();
-    bg.lineStyle({width: 2, color: 0xCCCCCC });
-
-    let y = ySpacing / 2;
-    
-    while (y < height) {
-        bg.moveTo(0, y);
-        bg.lineTo(width, y);
-        y += ySpacing;
-    }
-
-    bgContainer.addChild(bg);
-
-    const border = new PIXI.Graphics();
-    border.lineStyle({width: 10, color: 0xEEEEEE });
-    border.moveTo(-5, -5); // move to top left
-    border.lineTo(-5, height + 5); // left border
-    border.lineTo(width + 5, height + 5); // bottom border
-    border.lineTo(width + 5, -5); // right border
-    border.lineTo(-5, -5); // border top
-
-    bgContainer.addChild(border);
 };
 
 interface NewRoomResponse {
@@ -177,7 +104,19 @@ const setupMenu = () => {
     
                 case "join":
                     const roomIDElem = document.querySelector("#room_id") as HTMLInputElement;
-                    boot(roomIDElem.value);
+                    if (roomIDElem.value == "") {
+                        if (!roomIDElem.classList.contains("error")) {
+                            roomIDElem.classList.add("error");
+                        }
+                        return;
+                    }
+
+                    let roomID = roomIDElem.value;
+                    if (parseInt(roomID).toString() === roomIDElem.value) {
+                        roomID = `room-${roomID}`;
+                    }
+
+                    boot(roomID);
                     break;
     
                 default:

@@ -1,6 +1,22 @@
+@import url("./messages.css");
+
+:root {
+    --error-color: #AA0000;
+    --light-text-color: #333;
+    --light-background-color: wheat;
+}
+
 html, body {
     margin: 0;
     padding: 0;
+    font-family: 'Permanent Marker', cursive;
+}
+
+button {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.2rem;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
 }
 
 .container {
@@ -15,6 +31,7 @@ header {
     flex: 0 0 auto;
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
 }
 
 .game {
@@ -22,19 +39,20 @@ header {
 }
 
 h1 {
-    font-size: 1rem;
-    flex: 1 0 auto;
+    font-size: 1.4rem;
+    flex: 0 0 auto;
+    padding-left: 1rem;
 }
 
 .room-out-header {
     flex: 0 0 auto;
+    padding-right: 1rem;
 }
 
 .gameover {
     width: 25vw;
     height: 25vw;
-    border: 1px solid black;
-    background-color: wheat;
+    background-color: var(--light-background-color);
     position: absolute;
     top: 50%;
     left: 50%;
@@ -45,6 +63,10 @@ h1 {
     display: none;
 }
 
+.invis {
+    visibility: hidden;
+}
+
 .gameover > * {
     padding-left: 10px;
 }
@@ -52,29 +74,32 @@ h1 {
 .splitview {
     display: flex;
     flex-direction: row;
+    text-align: center;
+    align-items: flex-end;
 }
 
 .splitview > * {
-    flex: 1 1 50%;
+    flex: 0 0 50%;
 }
 
 .mainmenu {
     width: 25vw;
     height: 25vw;
-    border: 1px solid black;
-    background-color: wheat;
+    background-color: var(--light-background-color);
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     padding: 1rem;
+    border: 1px solid transparent;
+    border-radius: 1rem;
+    box-shadow: .5rem .5rem 1rem;
 }
 
 .mainmenu h2 {
-    font-family: 'Rubik Bubbles', cursive;
     width: 100%;
     text-align: center;
-    color: #333;
+    color: var(--light-text-color);
     font-size: 3rem;
     font-weight: normal;
     margin: 1rem 0;
@@ -83,11 +108,23 @@ h1 {
 .form-row {
     display: flex;
     flex-direction: column;
-    max-width: 5rem;
-    margin: 1rem 0;
+    align-items: center;
+    margin: 1rem auto;
+}
+
+.form-row input {
+    font-size: 1rem;
+    padding: 0.2rem;
+    width: 7rem;
+}
+
+.form-row input.error {
+    border: 1px solid var(--error-color);
 }
 
 .form-row > label {
+    font-size: 1rem;
     color: #666;
-    font-size: .8rem;
+    font-size: 1rem;
 }
+

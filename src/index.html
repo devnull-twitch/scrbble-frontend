@@ -7,13 +7,20 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik+Bubbles&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
   </head>
   <body>
     <div class="container">
       <header>
         <h1>Scrbble fun!</h1>
-        <p class="room-out-header hide">Current room: <span class="roomid-out"></span></p>
+        <div class="messages hide">
+          <p class="message-out"></p>
+          <button type="button" class="message-read-btn">X</button>
+        </div>
+        <div class="room-out-header invis">
+          <button type="button" class="leave-room-btn">Leave room</button>
+          <p>Current room: <span class="roomid-out"></span></p>
+        </div>
       </header>
       <div class="game">
         <canvas id="pixiview"></canvas>
@@ -23,17 +30,16 @@
       </div>
       <div class="mainmenu">
         <h2>Scrbble</h2>
+        <div>
+          <input type="color" id="bubble_color" />
+        </div>
         <div class="splitview">
           <div>
             <div class="form-row">
               <label for="room_id">Join a room</label>
-              <input type="text" id="room_id" name="room_id" placeholder="Room ID" />
+              <input type="text" id="room_id" name="room_id" placeholder="Enter number" />
             </div>
-            <div class="form-row">
-              <button type="button" data-target="join">
-                Join
-              </button>
-            </div>
+            <button type="button" data-target="join">Join</button>
           </div>
           <div>
             <button type="button" data-target="new">Create room</button>
